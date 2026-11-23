@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaamConnect — Voice-First Job Matching & Skill Passport</title>
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            cream: '#F5EFE0',
+            navy: {
+              DEFAULT: '#1B1F6B',
+              light: '#2A308C',
+              dark: '#12154D',
+              soft: '#EEF0FA',
+            },
+            brandOrange: {
+              DEFAULT: '#C2410C',
+              hover: '#9A3412',
+              soft: '#FFF3ED',
+            },
+            softGrey: '#64748B',
+            slateText: '#475569',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #F5EFE0;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1E293B;
+    }
+
+    /* Realistic Phone Frame (390x844) */
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      max-width: 100vw;
+      max-height: 100vh;
+      background: #F8FAFC;
+      border-radius: 46px;
+      box-shadow:
+        0 25px 60px -15px rgba(27, 31, 107, 0.25),
+        0 0 0 11px #18181B,
+        0 0 0 13px #3F3F46;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 420px) {
+      .phone-frame {
+        border-radius: 0;
+        box-shadow: none;
+        width: 100vw;
+        height: 100dvh;
+      }
+    }
+
+    /* Custom subtle scrollbar */
+    .scroll-area::-webkit-scrollbar {
+      width: 4px;
+    }
+    .scroll-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scroll-area::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 9999px;
+    }
+
+    /* Screen Transitions */
+    .screen-view {
+      animation: screenFadeSlide 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes screenFadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Pop-in animation for chips */
+    .chip-pop {
+      animation: chipPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes chipPopIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.75) translateY(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Waveform Bars Animation */
+    .wave-bar {
+      animation: soundWave 0.7s ease-in-out infinite alternate;
+    }
+    .wave-bar:nth-child(1) { animation-delay: 0.05s; }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.35s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.25s; }
+    .wave-bar:nth-child(6) { animation-delay: 0.4s; }
+    .wave-bar:nth-child(7) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(8) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(9) { animation-delay: 0.08s; }
+
+    @keyframes soundWave {
+      0% { transform: scaleY(0.28); }
+      100% { transform: scaleY(1); }
+    }
+
+    /* Pulse ring for mic button */
+    .mic-pulse {
+      animation: micPulseRing 1.8s infinite;
+    }
+
+    @keyframes micPulseRing {
+      0% {
+        box-shadow: 0 0 0 0 rgba(194, 65, 12, 0.45);
+      }
+      70% {
+        box-shadow: 0 0 0 16px rgba(194, 65, 12, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(194, 65, 12, 0);
+      }
+    }
+
+    /* Bouncing thinking dots */
+    .dot-bounce {
+      animation: dotBounce 1.2s infinite ease-in-out both;
+    }
+    .dot-bounce:nth-child(1) { animation-delay: -0.32s; }
+    .dot-bounce:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Centered 390x844 Phone Frame -->
+  <div class="phone-frame" id="app-frame">
+    
+    <!-- Top iOS-style Status Bar & Dynamic Notch -->
+    <div class="bg-[#1B1F6B] text-white px-6 pt-2.5 pb-1 flex items-center justify-between text-[11px] font-semibold select-none shrink-0 z-20">
+      <span>9:41</span>
+      <!-- Dynamic Island / Notch -->
+      <div class="w-24 h-5 bg-black rounded-full flex items-center justify-end px-2">
+        <div class="w-2 h-2 rounded-full bg-slate-800 border border-slate-700"></div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <!-- Signal -->
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="2" y="14" width="3" height="6" rx="1"/>
+          <rect x="7" y="10" width="3" height="10" rx="1"/>
+          <rect x="12" y="6" width="3" height="14" rx="1"/>
+          <rect x="17" y="2" width="3" height="18" rx="1"/>
+        </svg>
+        <!-- Battery -->
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="16" height="10" rx="2" fill="currentColor"/>
+          <path d="M21 10v4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Persistent App Header -->
+    <header class="bg-[#1B1F6B] text-white px-4 py-3 flex items-center justify-between shadow-md shrink-0 z-20">
+      <button onclick="navigateTo('chat')" class="flex items-center gap-2.5 text-left focus:outline-none active:scale-95 transition-transform">
+        <div class="w-9 h-9 rounded-xl bg-[#C2410C] flex items-center justify-center shadow-inner border border-orange-400/30">
+          <!-- Voice + Bolt Icon -->
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold leading-tight tracking-tight">KaamConnect</h1>
+          <p class="text-[10px] text-indigo-200 font-medium leading-none mt-0.5">Bol kar kaam paayein</p>
+        </div>
+      </button>
+
+      <!-- Visual Language Chip (Cycles on tap) -->
+      <button
+        id="lang-chip"
+        onclick="cycleLanguage()"
+        class="bg-white/15 hover:bg-white/25 active:scale-95 transition-all border border-white/25 rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-white shadow-sm"
+        title="Tap to switch display language label"
+      >
+        <svg class="w-3.5 h-3.5 text-orange-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span id="lang-label">English</span>
+      </button>
+    </header>
+
+    <!-- Main Scrollable Screen Container -->
+    <main id="main-content" class="flex-1 overflow-y-auto scroll-area relative bg-[#F8FAFC]">
+      <!-- Dynamic Screen Content Injected Here -->
+    </main>
+
+    <!-- Persistent Bottom Tab Bar -->
+    <nav class="bg-white border-t border-slate-200 px-2 py-2 pb-4 grid grid-cols-4 gap-1 shrink-0 z-20 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
+      <button
+        id="tab-chat"
+        onclick="navigateTo('chat')"
+        class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all active:scale-95"
+      >
+        <div class="w-7 h-7 flex items-center justify-center rounded-xl mb-0.5 tab-icon-wrap">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <span class="text-[11px] font-semibold">Chat</span>
+      </button>
+
+      <button
+        id="tab-jobs"
+        onclick="navigateTo('jobs')"
+        class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all active:scale-95 relative"
+      >
+        <div class="w-7 h-7 flex items-center justify-center rounded-xl mb-0.5 tab-icon-wrap relative">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+          <span class="absolute -top-1 -right-2 bg-[#1B1F6B] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
+        </div>
+        <span class="text-[11px] font-semibold">Jobs</span>
+      </button>
+
+      <button
+        id="tab-passport"
+        onclick="navigateTo('passport')"
+        class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all active:scale-95"
+      >
+        <div class="w-7 h-7 flex items-center justify-center rounded-xl mb-0.5 tab-icon-wrap">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <span class="text-[11px] font-semibold">Passport</span>
+      </button>
+
+      <button
+        id="tab-alerts"
+        onclick="navigateTo('alerts')"
+        class="nav-tab flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all active:scale-95 relative"
+      >
+        <div class="w-7 h-7 flex items-center justify-center rounded-xl mb-0.5 tab-icon-wrap relative">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span id="alerts-badge" class="absolute -top-1 -right-1.5 bg-[#C2410C] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">2</span>
+        </div>
+        <span class="text-[11px] font-semibold">Alerts</span>
+      </button>
+    </nav>
+
+    <!-- In-App Modal / Toast Overlay Container -->
+    <div id="overlay-modal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] z-50 flex items-end sm:items-center justify-center p-4">
+      <div id="overlay-card" class="bg-white w-full rounded-3xl p-5 shadow-2xl border border-slate-100 screen-view">
+        <!-- Dynamic modal content -->
+      </div>
+    </div>
+
+    <!-- Bottom Toast Banner -->
+    <div id="toast-banner" class="hidden absolute bottom-24 left-4 right-4 bg-[#1B1F6B] text-white px-4 py-3 rounded-2xl shadow-xl z-40 flex items-center gap-3 text-xs font-medium transition-all">
+      <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <span id="toast-text" class="flex-1">Action completed</span>
+    </div>
+
+  </div>
+
+  <script>
+    // ==========================================
+    // HARDCODED SAMPLE DATA & APP STATE
+    // ==========================================
+    const LANGUAGES = ['English', 'हिन्दी', 'ಕನ್ನಡ'];
+
+    const WORKER_PROFILE = {
+      name: 'Raju K.',
+      trade: 'Electrician',
+      area: 'Pune',
+      experience: '10 years',
+      rating: 4.7,
+      verifiedJobs: 12,
+      skills: [
+        { name: 'Wiring', badge: 'AI-checked 92%', type: 'ai' },
+        { name: 'Appliance repair', badge: 'Peer verified', type: 'peer' }
+      ],
+      workPhotos: [
+        {
+          id: 'w1',
+          title: '3-Phase DB Box Wiring',
+          location: 'Kothrud, Pune',
+          confidence: '92%',
+          notes: 'MCB labeling, proper earthing & neat conduit routing verified by Vision AI.',
+          svgType: 'db'
+        },
+        {
+          id: 'w2',
+          title: 'Ceiling Fan & Regulator Setup',
+          location: 'Aundh, Pune',
+          confidence: '92%',
+          notes: 'Secure hook mount & concealed switchboard wiring verified.',
+          svgType: 'fan'
+        },
+        {
+          id: 'w3',
+          title: 'Modular Switchboard Fitting',
+          location: 'Karve Nagar, Pune',
+          confidence: '92%',
+          notes: 'Phase-neutral polarity check & load balancing passed.',
+          svgType: 'switch'
+        },
+        {
+          id: 'w4',
+          title: 'Shop LED Track Lighting',
+          location: 'FC Road, Pune',
+          confidence: '92%',
+          notes: 'Driver insulation & low-voltage surge safety verified.',
+          svgType: 'led'
+        }
+      ]
+    };
+
+    // Jobs pre-sorted by distance (2.1 km, 3.2 km, 4.5 km)
+    const JOBS_DATA = [
+      {
+        id: 'job-1',
+        title: 'House wiring',
+        area: 'Kothrud',
+        distanceKm: 2.1,
+        distanceLabel: '2.1 km',
+        pay: 900,
+        payLabel: 'Rs 900/day',
+        marketRate: 'Rs 850–950',
+        wageStatus: 'Fair rate',
+        isFair: true,
+        timing: 'Tomorrow, 9:00 AM',
+        duration: '2 days',
+        employer: {
+          name: 'Mrs. Deshpande',
+          verified: true,
+          rating: 4.8,
+          jobsPosted: 14,
+          memberSince: '2023',
+          phone: '+91 98220 •••41',
+          scamChecks: [
+            { label: 'Identity verified', passed: true, detail: 'Aadhaar & address verified' },
+            { label: 'Payment history', passed: true, detail: '14/14 workers paid on time' },
+            { label: 'No advance fee', passed: true, detail: 'Zero registration or deposit fee' }
+          ]
+        }
+      },
+      {
+        id: 'job-2',
+        title: 'Fan and light repair',
+        area: 'Aundh',
+        distanceKm: 3.2,
+        distanceLabel: '3.2 km',
+        pay: 700,
+        payLabel: 'Rs 700/day',
+        marketRate: 'Rs 650–750',
+        wageStatus: 'Fair rate',
+        isFair: true,
+        timing: 'Tomorrow, 10:30 AM',
+        duration: '1 day',
+        employer: {
+          name: 'Sharma Hardware',
+          verified: true,
+          rating: 4.6,
+          jobsPosted: 28,
+          memberSince: '2022',
+          phone: '+91 98501 •••89',
+          scamChecks: [
+            { label: 'Identity verified', passed: true, detail: 'GST & shop license verified' },
+            { label: 'Payment history', passed: true, detail: '28/28 workers paid on time' },
+            { label: 'No advance fee', passed: true, detail: 'Direct cash or UPI after work' }
+          ]
+        }
+      },
+      {
+        id: 'job-3',
+        title: 'Shop fitting',
+        area: 'Baner',
+        distanceKm: 4.5,
+        distanceLabel: '4.5 km',
+        pay: 400,
+        payLabel: 'Rs 400/day',
+        marketRate: 'Rs 850–950',
+        wageStatus: 'Below market',
+        isFair: false,
+        timing: 'Tomorrow, 9:00 AM',
+        duration: '3 days',
+        employer: {
+          name: 'QuickHire Services',
+          verified: false,
+          rating: 2.1,
+          jobsPosted: 0,
+          memberSince: 'Nov 2026',
+          unverifiedReasons: ['New account', 'Asks advance fee', 'No past jobs'],
+          scamChecks: [
+            { label: 'Identity verified', passed: false, detail: 'Unverified new account (Nov 2026)' },
+            { label: 'Payment history', passed: false, detail: 'No past jobs completed on platform' },
+            { label: 'No advance fee', passed: false, detail: 'Warning: Asks Rs 200 advance fee' }
+          ]
+        }
+      }
+    ];
+
+    // App Interactive State
+    const state = {
+      currentScreen: 'chat', // 'chat' | 'jobs' | 'trust' | 'confirmed' | 'passport' | 'alerts'
+      langIndex: 0,
+      chatStep: 'idle', // 'idle' | 'recording' | 'analyzing' | 'done'
+      recordingSeconds: 3,
+      selectedJobId: 'job-1',
+      reportedEmployers: {},
+      acceptedJobs: {},
+      urgentAlertStatus: 'pending', // 'pending' | 'accepted' | 'skipped'
+      teamJoined: false
+    };
+
+    let activeTimers = [];
+
+    function clearTimers() {
+      activeTimers.forEach(t => clearTimeout(t));
+      activeTimers.forEach(t => clearInterval(t));
+      activeTimers = [];
+    }
+
+    // ==========================================
+    // NAVIGATION & GLOBAL CONTROLS
+    // ==========================================
+    function cycleLanguage() {
+      state.langIndex = (state.langIndex + 1) % LANGUAGES.length;
+      const chipLabel = document.getElementById('lang-label');
+      chipLabel.textContent = LANGUAGES[state.langIndex];
+      showToast(`Language display: ${LANGUAGES[state.langIndex]}`);
+    }
+
+    function navigateTo(screen, jobId = null) {
+      if (jobId) {
+        state.selectedJobId = jobId;
+      }
+      state.currentScreen = screen;
+      updateTabBar();
+      renderScreen();
+      document.getElementById('main-content').scrollTop = 0;
+    }
+
+    function updateTabBar() {
+      const tabs = ['chat', 'jobs', 'passport', 'alerts'];
+      const activeTab = (state.currentScreen === 'trust' || state.currentScreen === 'confirmed')
+        ? 'jobs'
+        : state.currentScreen;
+
+      tabs.forEach(tab => {
+        const el = document.getElementById(`tab-${tab}`);
+        const iconWrap = el.querySelector('.tab-icon-wrap');
+        if (tab === activeTab) {
+          el.classList.add('text-[#1B1F6B]');
+          el.classList.remove('text-[#64748B]');
+          iconWrap.classList.add('bg-[#EEF0FA]', 'text-[#1B1F6B]');
+        } else {
+          el.classList.remove('text-[#1B1F6B]');
+          el.classList.add('text-[#64748B]');
+          iconWrap.classList.remove('bg-[#EEF0FA]', 'text-[#1B1F6B]');
+        }
+      });
+
+      const badge = document.getElementById('alerts-badge');
+      if (badge) {
+        const count = (state.urgentAlertStatus === 'pending' ? 1 : 0) + (state.teamJoined ? 0 : 1);
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-banner');
+      const text = document.getElementById('toast-text');
+      text.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2600);
+    }
+
+    function closeModal() {
+      document.getElementById('overlay-modal').classList.add('hidden');
+    }
+
+    function openModal(htmlContent) {
+      const modal = document.getElementById('overlay-modal');
+      const card = document.getElementById('overlay-card');
+      card.innerHTML = htmlContent;
+      modal.classList.remove('hidden');
+    }
+
+    function renderFooter() {
+      return `
+        <footer class="pt-5 pb-4 text-center">
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#64748B] bg-slate-200/60 px-3 py-1 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#1B1F6B]"></span>
+            Prototype with sample data
+          </span>
+        </footer>
+      `;
+    }
+
+    // ==========================================
+    // SCREEN 1: VOICE ONBOARDING (CHAT)
+    // ==========================================
+    function startVoiceRecording() {
+      if (state.chatStep === 'recording' || state.chatStep === 'analyzing') return;
+      clearTimers();
+
+      state.chatStep = 'recording';
+      state.recordingSeconds = 3;
+      renderScreen();
+
+      const countdown = setInterval(() => {
+        state.recordingSeconds -= 1;
+        const timerEl = document.getElementById('rec-timer');
+        if (timerEl && state.recordingSeconds >= 0) {
+          timerEl.textContent = `0:0${state.recordingSeconds}`;
+        }
+      }, 1000);
+      activeTimers.push(countdown);
+
+      const t1 = setTimeout(() => {
+        clearInterval(countdown);
+        state.chatStep = 'analyzing';
+        renderScreen();
+        scrollChatBottom();
+
+        const t2 = setTimeout(() => {
+          state.chatStep = 'done';
+          renderScreen();
+          scrollChatBottom();
+        }, 1500);
+        activeTimers.push(t2);
+      }, 3000);
+      activeTimers.push(t1);
+    }
+
+    function resetVoiceChat() {
+      clearTimers();
+      state.chatStep = 'idle';
+      state.recordingSeconds = 3;
+      renderScreen();
+    }
+
+    function scrollChatBottom() {
+      const container = document.getElementById('main-content');
+      if (container) {
+        setTimeout(() => {
+          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }, 60);
+      }
+    }
+
+    function renderChatScreen() {
+      const step = state.chatStep;
+
+      return `
+        <div class="min-h-full flex flex-col justify-between bg-[#ECE5DD]/55 px-3.5 pt-4 pb-2 screen-view">
+          <!-- Chat Messages Thread -->
+          <div class="space-y-3.5">
+            <!-- Date Pill -->
+            <div class="flex justify-center">
+              <span class="bg-white/90 text-[#64748B] text-[11px] font-semibold px-3 py-1 rounded-full shadow-xs border border-slate-200/70">
+                Today • Voice Assistant
+              </span>
+            </div>
+
+            <!-- Bot Welcome Message -->
+            <div class="flex items-end gap-2 max-w-[88%]">
+              <div class="w-8 h-8 rounded-full bg-[#1B1F6B] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                </svg>
+              </div>
+              <div class="bg-white rounded-2xl rounded-bl-sm p-3.5 shadow-sm border border-slate-100">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="text-[11px] font-bold text-[#1B1F6B]">KaamConnect Helper</span>
+                  <button onclick="showToast('Playing Hindi & English voice prompt...')" class="w-6 h-6 rounded-full bg-[#EEF0FA] text-[#1B1F6B] flex items-center justify-center active:scale-90 transition-transform" title="Listen">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+                <p class="text-[13.5px] text-slate-800 leading-snug font-medium">
+                  Namaste Raju! Tap the mic and tell me what work you need, your area, and when you are free.
+                </p>
+                <p class="text-[11px] text-[#64748B] mt-1">
+                  "Mujhe kal Pune mein electrician ka kaam chahiye"
+                </p>
+              </div>
+            </div>
+
+            <!-- User Voice Note Bubble (Appears after recording) -->
+            ${(step === 'analyzing' || step === 'done') ? `
+              <div class="flex justify-end chip-pop">
+                <div class="bg-[#DCF8C6] border border-emerald-200/80 rounded-2xl rounded-br-sm p-3.5 max-w-[85%] shadow-sm">
+                  <div class="flex items-center gap-2.5">
+                    <button onclick="showToast('Playing your recorded voice note (0:03)')" class="w-9 h-9 rounded-full bg-[#1B1F6B] text-white flex items-center justify-center shrink-0 shadow-xs active:scale-95">
+                      <svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                      </svg>
+                    </button>
+                    <!-- Static Voice Waveform -->
+                    <div class="flex items-center gap-1 h-6 flex-1">
+                      <span class="w-1 h-3 bg-[#1B1F6B]/60 rounded-full"></span>
+                      <span class="w-1 h-5 bg-[#1B1F6B] rounded-full"></span>
+                      <span class="w-1 h-4 bg-[#1B1F6B]/80 rounded-full"></span>
+                      <span class="w-1 h-6 bg-[#1B1F6B] rounded-full"></span>
+                      <span class="w-1 h-3.5 bg-[#1B1F6B]/70 rounded-full"></span>
+                      <span class="w-1 h-5 bg-[#1B1F6B] rounded-full"></span>
+                      <span class="w-1 h-2.5 bg-[#1B1F6B]/50 rounded-full"></span>
+                      <span class="w-1 h-4.5 bg-[#1B1F6B]/80 rounded-full"></span>
+                      <span class="w-1 h-3 bg-[#1B1F6B]/60 rounded-full"></span>
+                      <span class="w-1 h-5 bg-[#1B1F6B] rounded-full"></span>
+                      <span class="w-1 h-2 bg-[#1B1F6B]/40 rounded-full"></span>
+                    </div>
+                    <span class="text-[11px] font-bold text-slate-700">0:03</span>
+                  </div>
+                  <p class="text-[11.5px] text-slate-700 italic mt-2 pt-1.5 border-t border-emerald-300/50">
+                    “Mujhe kal Pune mein electrician ka kaam chahiye”
+                  </p>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- AI "Understanding your message..." Loading State -->
+            ${step === 'analyzing' ? `
+              <div class="flex items-center gap-2 max-w-[82%] chip-pop">
+                <div class="w-8 h-8 rounded-full bg-[#1B1F6B] text-white flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                  </svg>
+                </div>
+                <div class="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-indigo-100 flex items-center gap-2.5">
+                  <span class="text-xs font-semibold text-[#1B1F6B]">Understanding your message</span>
+                  <div class="flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#C2410C] dot-bounce"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#C2410C] dot-bounce"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#C2410C] dot-bounce"></span>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- AI Extracted Chips + CTA Card -->
+            ${step === 'done' ? `
+              <div class="flex items-start gap-2 max-w-[95%] chip-pop">
+                <div class="w-8 h-8 rounded-full bg-[#1B1F6B] text-white flex items-center justify-center shrink-0 mt-1 shadow-xs">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="bg-white rounded-2xl rounded-bl-sm p-4 shadow-md border border-slate-100 flex-1">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                      </svg>
+                      Got it! Details matched:
+                    </span>
+                    <button onclick="resetVoiceChat()" class="text-[11px] font-semibold text-[#64748B] hover:text-[#1B1F6B] underline">
+                      Replay demo
+                    </button>
+                  </div>
+
+                  <!-- Three Pop-in Tag Chips -->
+                  <div class="flex flex-wrap gap-2 my-3">
+                    <span style="animation-delay: 0.05s" class="chip-pop inline-flex items-center gap-1.5 bg-[#EEF0FA] text-[#1B1F6B] border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-bold">
+                      <svg class="w-3.5 h-3.5 text-[#C2410C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                      </svg>
+                      Skill: Electrician
+                    </span>
+
+                    <span style="animation-delay: 0.16s" class="chip-pop inline-flex items-center gap-1.5 bg-[#EEF0FA] text-[#1B1F6B] border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-bold">
+                      <svg class="w-3.5 h-3.5 text-[#C2410C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      Area: Pune
+                    </span>
+
+                    <span style="animation-delay: 0.27s" class="chip-pop inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-bold">
+                      <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      Available: Tomorrow
+                    </span>
+                  </div>
+
+                  <!-- Primary CTA Button: See jobs -->
+                  <button
+                    onclick="navigateTo('jobs')"
+                    class="w-full mt-1 bg-[#C2410C] hover:bg-[#9A3412] active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-orange-900/20 flex items-center justify-between text-sm"
+                  >
+                    <span class="flex items-center gap-2">
+                      <span>See jobs</span>
+                      <span class="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">3 matches</span>
+                    </span>
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Bottom Voice Recorder Dock -->
+          <div class="mt-6 pt-3">
+            ${step === 'recording' ? `
+              <!-- Active 3-second Recording Waveform Box -->
+              <div class="bg-[#1B1F6B] text-white rounded-3xl p-4 shadow-xl border border-indigo-400/30 flex flex-col items-center">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                  <span class="text-xs font-bold tracking-wide uppercase text-orange-300">Listening... <span id="rec-timer">0:0${state.recordingSeconds}</span></span>
+                </div>
+                <!-- Live Animated Waveform -->
+                <div class="flex items-center justify-center gap-1.5 h-10 my-1">
+                  <span class="w-1.5 h-8 bg-orange-400 rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-10 bg-white rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-7 bg-orange-400 rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-10 bg-white rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-9 bg-orange-300 rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-10 bg-white rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-7 bg-orange-400 rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-9 bg-white rounded-full wave-bar"></span>
+                  <span class="w-1.5 h-6 bg-orange-400 rounded-full wave-bar"></span>
+                </div>
+                <p class="text-[11px] text-indigo-200 mt-1">Speak clearly in Hindi, Marathi, or English</p>
+              </div>
+            ` : `
+              <!-- Big Mic Tap Button -->
+              <div class="bg-white rounded-3xl p-4 shadow-md border border-slate-200/80 flex flex-col items-center text-center">
+                <button
+                  onclick="startVoiceRecording()"
+                  class="w-16 h-16 rounded-full bg-[#C2410C] hover:bg-[#9A3412] active:scale-95 transition-all text-white flex items-center justify-center shadow-lg mic-pulse mb-2.5"
+                  aria-label="Tap to speak"
+                >
+                  <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                  </svg>
+                </button>
+                <p class="text-sm font-bold text-[#1B1F6B]">
+                  ${step === 'done' ? 'Tap mic to speak again' : 'Tap mic to speak'}
+                </p>
+                <p class="text-[11px] text-[#64748B]">
+                  1-tap voice search • No typing needed
+                </p>
+              </div>
+            `}
+            ${renderFooter()}
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // SCREEN 2: JOB MATCHES (SORTED BY DISTANCE)
+    // ==========================================
+    function renderJobsScreen() {
+      const cardsHtml = JOBS_DATA.map((job) => {
+        const isAccepted = !!state.acceptedJobs[job.id];
+        const isReported = !!state.reportedEmployers[job.employer.name];
+
+        return `
+          <div
+            onclick="navigateTo('trust', '${job.id}')"
+            role="button"
+            tabindex="0"
+            class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-md active:scale-[0.99] transition-all border ${job.isFair ? 'border-slate-200/90' : 'border-red-200 bg-red-50/20'} cursor-pointer"
+          >
+            <!-- Top Row: Trade Icon + Job Title + Distance Pill -->
+            <div class="flex items-start justify-between gap-2.5">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl ${job.isFair ? 'bg-[#EEF0FA] text-[#1B1F6B]' : 'bg-red-100 text-red-700'} flex items-center justify-center shrink-0">
+                  <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-[15px] font-bold text-slate-900 leading-tight">${job.title}</h3>
+                  <div class="flex items-center gap-1.5 text-xs text-[#64748B] font-medium mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-[#C2410C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>${job.area}</span>
+                    <span>•</span>
+                    <span class="font-bold text-[#1B1F6B]">${job.distanceLabel}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status Indicator if already Accepted/Reported -->
+              ${isAccepted ? `
+                <span class="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Accepted</span>
+              ` : isReported ? `
+                <span class="bg-slate-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Reported</span>
+              ` : `
+                <svg class="w-5 h-5 text-slate-400 shrink-0 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              `}
+            </div>
+
+            <!-- Middle Row: Daily Pay + Fair-Wage Badge -->
+            <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div>
+                <span class="text-[11px] text-[#64748B] block font-medium">Daily wage</span>
+                <span class="text-base font-extrabold text-slate-900">${job.payLabel}</span>
+              </div>
+
+              <!-- Fair Wage Colored Badge -->
+              ${job.isFair ? `
+                <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full text-xs font-bold">
+                  <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Fair rate
+                </span>
+              ` : `
+                <span class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-full text-xs font-bold">
+                  <svg class="w-3.5 h-3.5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  Below market
+                </span>
+              `}
+            </div>
+
+            <!-- Bottom Strip: Employer Verification Preview -->
+            <div class="mt-2.5 flex items-center justify-between text-[11.5px]">
+              <span class="text-[#475569] font-medium">Employer: <strong class="text-slate-800">${job.employer.name}</strong></span>
+              ${job.employer.verified ? `
+                <span class="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  Verified • ${job.employer.rating}★
+                </span>
+              ` : `
+                <span class="inline-flex items-center gap-1 text-red-600 font-bold">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                  </svg>
+                  Unverified
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="px-4 pt-4 pb-2 space-y-3.5 screen-view">
+          <!-- Filter Summary & Sort Header -->
+          <div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-[#C2410C]">Voice Match Results</span>
+                <h2 class="text-sm font-bold text-[#1B1F6B] mt-0.5">Electrician • Pune • Tomorrow</h2>
+              </div>
+              <button onclick="navigateTo('chat')" class="w-9 h-9 rounded-xl bg-[#EEF0FA] text-[#1B1F6B] flex items-center justify-center active:scale-95" title="Edit via Voice">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                </svg>
+              </button>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-[#64748B] font-medium">
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-[#1B1F6B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="6" y1="12" x2="18" y2="12"/>
+                  <line x1="9" y1="18" x2="15" y2="18"/>
+                </svg>
+                Sorted by distance (nearest first)
+              </span>
+              <span class="font-bold text-[#1B1F6B]">3 jobs</span>
+            </div>
+          </div>
+
+          <!-- Job Cards List -->
+          <div class="space-y-3">
+            ${cardsHtml}
+          </div>
+
+          ${renderFooter()}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // SCREEN 3: EMPLOYER TRUST CARD + CONFIRMATION
+    // ==========================================
+    function handleAcceptJob(jobId) {
+      state.acceptedJobs[jobId] = true;
+      navigateTo('confirmed', jobId);
+    }
+
+    function handleReportEmployer(employerName) {
+      state.reportedEmployers[employerName] = true;
+      openModal(`
+        <div class="text-center space-y-3">
+          <div class="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Employer Reported</h3>
+          <p class="text-xs text-[#475569] leading-relaxed">
+            <strong>${employerName}</strong> has been flagged for asking an advance fee and offering below-market wages. Our safety team will review and block this account.
+          </p>
+          <button
+            onclick="closeModal(); navigateTo('jobs');"
+            class="w-full bg-[#1B1F6B] text-white font-bold py-3 rounded-2xl text-sm active:scale-95 transition-transform"
+          >
+            Back to Safe Jobs
+          </button>
+        </div>
+      `);
+    }
+
+    function renderTrustScreen() {
+      const job = JOBS_DATA.find(j => j.id === state.selectedJobId) || JOBS_DATA[0];
+      const emp = job.employer;
+      const isReported = !!state.reportedEmployers[emp.name];
+
+      const checksHtml = emp.scamChecks.map(check => `
+        <div class="flex items-start gap-3 py-2.5 border-b border-slate-100 last:border-none">
+          ${check.passed ? `
+            <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          ` : `
+            <div class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+          `}
+          <div class="flex-1">
+            <p class="text-xs font-bold ${check.passed ? 'text-slate-800' : 'text-red-700'}">${check.label}</p>
+            <p class="text-[11px] text-[#64748B]">${check.detail}</p>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="px-4 pt-3 pb-2 space-y-3.5 screen-view">
+          <!-- Back Button -->
+          <button
+            onclick="navigateTo('jobs')"
+            class="inline-flex items-center gap-1.5 text-xs font-bold text-[#1B1F6B] bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-2xs active:scale-95"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back to Job Matches
+          </button>
+
+          <!-- Unverified Red Warning Banner -->
+          ${!emp.verified ? `
+            <div class="bg-red-600 text-white rounded-3xl p-4 shadow-md border border-red-400">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-extrabold uppercase tracking-wide">Do not pay any advance</h3>
+                  <p class="text-[11.5px] text-red-100 leading-snug mt-0.5">
+                    High risk: ${emp.unverifiedReasons.join(' • ')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Employer Header Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl ${emp.verified ? 'bg-[#1B1F6B] text-white' : 'bg-red-100 text-red-700'} flex items-center justify-center font-bold text-lg shrink-0">
+                  ${emp.name.charAt(0)}
+                </div>
+                <div>
+                  <h2 class="text-base font-extrabold text-slate-900 leading-tight">${emp.name}</h2>
+                  <!-- Verified or Unverified Badge -->
+                  <div class="mt-1">
+                    ${emp.verified ? `
+                      <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Verified Employer
+                      </span>
+                    ` : `
+                      <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                        <svg class="w-3.5 h-3.5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                        </svg>
+                        Unverified Account
+                      </span>
+                    `}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats Grid: Rating, Jobs Posted, Member Since -->
+            <div class="grid grid-cols-3 gap-2 mt-4 pt-3.5 border-t border-slate-100 text-center">
+              <div class="bg-slate-50 rounded-2xl p-2">
+                <span class="text-sm font-extrabold text-slate-900 block">${emp.rating} ★</span>
+                <span class="text-[10px] text-[#64748B] font-medium">Rating</span>
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-2">
+                <span class="text-sm font-extrabold text-slate-900 block">${emp.jobsPosted}</span>
+                <span class="text-[10px] text-[#64748B] font-medium">Jobs posted</span>
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-2">
+                <span class="text-sm font-extrabold text-slate-900 block">${emp.memberSince}</span>
+                <span class="text-[10px] text-[#64748B] font-medium">Member since</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job & Wage Comparison Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-semibold text-[#64748B]">Job Role</span>
+                <h3 class="text-sm font-bold text-slate-900">${job.title} • ${job.area} (${job.distanceLabel})</h3>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full ${job.isFair ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}">
+                ${job.wageStatus}
+              </span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+              <div>
+                <span class="text-[#64748B] block text-[11px]">Offered Pay</span>
+                <strong class="text-base font-extrabold text-[#1B1F6B]">${job.payLabel}</strong>
+              </div>
+              <div class="text-right">
+                <span class="text-[#64748B] block text-[11px]">Pune Market Rate</span>
+                <strong class="text-slate-700 font-bold">${job.marketRate}/day</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scam Check Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90">
+            <div class="flex items-center justify-between mb-1">
+              <h3 class="text-sm font-extrabold text-[#1B1F6B] flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#C2410C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Scam check
+              </h3>
+              <span class="text-[11px] font-semibold text-[#64748B]">3 safety checks</span>
+            </div>
+            <div>
+              ${checksHtml}
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-1">
+            ${emp.verified ? `
+              <button
+                onclick="handleAcceptJob('${job.id}')"
+                class="w-full bg-[#C2410C] hover:bg-[#9A3412] active:scale-[0.98] transition-all text-white font-bold py-4 px-5 rounded-2xl shadow-lg shadow-orange-900/20 flex items-center justify-center gap-2 text-base"
+              >
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Accept job
+              </button>
+            ` : `
+              <button
+                onclick="handleReportEmployer('${emp.name}')"
+                ${isReported ? 'disabled' : ''}
+                class="w-full ${isReported ? 'bg-slate-400' : 'bg-red-600 hover:bg-red-700 active:scale-[0.98]'} transition-all text-white font-bold py-4 px-5 rounded-2xl shadow-lg flex items-center justify-center gap-2 text-base"
+              >
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                  <line x1="4" y1="22" x2="4" y2="15"/>
+                </svg>
+                ${isReported ? 'Employer Reported' : 'Report'}
+              </button>
+            `}
+          </div>
+
+          ${renderFooter()}
+        </div>
+      `;
+    }
+
+    // Job Confirmation Screen (After accepting a verified job)
+    function renderConfirmedScreen() {
+      const job = JOBS_DATA.find(j => j.id === state.selectedJobId) || JOBS_DATA[0];
+
+      return `
+        <div class="px-4 pt-6 pb-2 space-y-4 screen-view text-center">
+          <div class="bg-white rounded-3xl p-6 shadow-md border border-emerald-200">
+            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 chip-pop">
+              <svg class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <span class="inline-block bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200 mb-2">
+              Booking Confirmed
+            </span>
+            <h2 class="text-xl font-extrabold text-[#1B1F6B]">Job Accepted!</h2>
+            <p class="text-xs text-[#64748B] mt-1">
+              Your verified Skill Passport has been shared with <strong>${job.employer.name}</strong>.
+            </p>
+
+            <!-- Summary Box -->
+            <div class="bg-slate-50 rounded-2xl p-4 mt-4 text-left space-y-2.5 border border-slate-200/70">
+              <div class="flex justify-between text-xs">
+                <span class="text-[#64748B]">Work</span>
+                <span class="font-bold text-slate-900">${job.title}</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[#64748B]">Location</span>
+                <span class="font-bold text-slate-900">${job.area} (${job.distanceLabel})</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[#64748B]">Reporting Time</span>
+                <span class="font-bold text-[#1B1F6B]">${job.timing}</span>
+              </div>
+              <div class="flex justify-between text-xs pt-2 border-t border-slate-200">
+                <span class="text-[#64748B]">Guaranteed Pay</span>
+                <span class="font-extrabold text-emerald-700 text-sm">${job.payLabel}</span>
+              </div>
+            </div>
+
+            <!-- Quick Contact & Map Buttons -->
+            <div class="grid grid-cols-2 gap-2.5 mt-4">
+              <button
+                onclick="showToast('Calling ${job.employer.name} (${job.employer.phone})...')"
+                class="bg-[#EEF0FA] hover:bg-indigo-100 text-[#1B1F6B] font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-1.5 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                Call Employer
+              </button>
+              <button
+                onclick="showToast('Opening route to ${job.area}, Pune (${job.distanceLabel})...')"
+                class="bg-[#EEF0FA] hover:bg-indigo-100 text-[#1B1F6B] font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-1.5 active:scale-95"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                </svg>
+                Directions
+              </button>
+            </div>
+          </div>
+
+          <button
+            onclick="navigateTo('jobs')"
+            class="w-full bg-[#1B1F6B] text-white font-bold py-3.5 rounded-2xl text-sm shadow-md active:scale-95"
+          >
+            Back to Jobs
+          </button>
+
+          ${renderFooter()}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // SCREEN 4: SKILL PASSPORT
+    // ==========================================
+    function getWorkIllustrationSvg(type) {
+      if (type === 'db') {
+        return `
+          <svg viewBox="0 0 200 120" class="w-full h-24 object-cover bg-slate-800">
+            <rect width="200" height="120" fill="#1E293B"/>
+            <rect x="45" y="15" width="110" height="90" rx="6" fill="#CBD5E1" stroke="#475569" stroke-width="3"/>
+            <rect x="58" y="30" width="84" height="24" rx="2" fill="#0F172A"/>
+            <rect x="64" y="34" width="10" height="16" fill="#38BDF8"/>
+            <rect x="78" y="34" width="10" height="16" fill="#38BDF8"/>
+            <rect x="92" y="34" width="10" height="16" fill="#F97316"/>
+            <rect x="106" y="34" width="10" height="16" fill="#38BDF8"/>
+            <rect x="120" y="34" width="10" height="16" fill="#38BDF8"/>
+            <path d="M69 54 C69 75, 85 75, 85 95" stroke="#EF4444" stroke-width="2.5" fill="none"/>
+            <path d="M97 54 C97 75, 110 75, 110 95" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+            <path d="M125 54 C125 75, 132 75, 132 95" stroke="#22C55E" stroke-width="2.5" fill="none"/>
+          </svg>
+        `;
+      }
+      if (type === 'fan') {
+        return `
+          <svg viewBox="0 0 200 120" class="w-full h-24 object-cover bg-amber-50">
+            <rect width="200" height="120" fill="#FEF3C7"/>
+            <line x1="100" y1="0" x2="100" y2="48" stroke="#334155" stroke-width="4"/>
+            <circle cx="100" cy="12" r="8" fill="#1B1F6B"/>
+            <ellipse cx="52" cy="54" rx="34" ry="7" fill="#C2410C"/>
+            <ellipse cx="148" cy="54" rx="34" ry="7" fill="#C2410C"/>
+            <circle cx="100" cy="54" r="16" fill="#1E293B"/>
+            <circle cx="100" cy="54" r="7" fill="#F59E0B"/>
+          </svg>
+        `;
+      }
+      if (type === 'switch') {
+        return `
+          <svg viewBox="0 0 200 120" class="w-full h-24 object-cover bg-slate-100">
+            <rect width="200" height="120" fill="#E2E8F0"/>
+            <rect x="40" y="22" width="120" height="76" rx="10" fill="#FFFFFF" stroke="#94A3B8" stroke-width="3"/>
+            <rect x="56" y="38" width="16" height="44" rx="3" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+            <rect x="80" y="38" width="16" height="44" rx="3" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+            <circle cx="126" cy="50" r="11" fill="#F8FAFC" stroke="#475569" stroke-width="2"/>
+            <circle cx="126" cy="46" r="2" fill="#0F172A"/>
+            <circle cx="121" cy="54" r="2" fill="#0F172A"/>
+            <circle cx="131" cy="54" r="2" fill="#0F172A"/>
+            <circle cx="126" cy="74" r="4" fill="#22C55E"/>
+          </svg>
+        `;
+      }
+      return `
+        <svg viewBox="0 0 200 120" class="w-full h-24 object-cover bg-indigo-950">
+          <rect width="200" height="120" fill="#1E1B4B"/>
+          <line x1="20" y1="26" x2="180" y2="26" stroke="#94A3B8" stroke-width="4"/>
+          <rect x="45" y="30" width="22" height="28" rx="4" fill="#F8FAFC"/>
+          <polygon points="45,58 67,58 85,110 27,110" fill="#FDE047" opacity="0.28"/>
+          <rect x="133" y="30" width="22" height="28" rx="4" fill="#F8FAFC"/>
+          <polygon points="133,58 155,58 173,110 115,110" fill="#FDE047" opacity="0.28"/>
+        </svg>
+      `;
+    }
+
+    function openPhotoModal(photoId) {
+      const photo = WORKER_PROFILE.workPhotos.find(p => p.id === photoId);
+      if (!photo) return;
+      openModal(`
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-[11px] font-bold">
+              AI check: ${photo.confidence} confidence
+            </span>
+            <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold">✕</button>
+          </div>
+          <div class="rounded-2xl overflow-hidden border border-slate-200">
+            ${getWorkIllustrationSvg(photo.svgType)}
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">${photo.title}</h3>
+            <p class="text-xs text-[#64748B] font-medium">${photo.location}</p>
+            <p class="text-xs text-slate-700 mt-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              ${photo.notes}
+            </p>
+          </div>
+          <button onclick="closeModal()" class="w-full bg-[#1B1F6B] text-white font-bold py-3 rounded-2xl text-xs">
+            Done
+          </button>
+        </div>
+      `);
+    }
+
+    function openSharePassportModal() {
+      openModal(`
+        <div class="text-center space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-[#EEF0FA] text-[#1B1F6B] flex items-center justify-center mx-auto">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <circle cx="18" cy="5" r="3"/>
+              <circle cx="6" cy="12" r="3"/>
+              <circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+          </div>
+          <h3 class="text-base font-extrabold text-slate-900">Share Skill Passport</h3>
+          <p class="text-xs text-[#64748B]">
+            Send your verified work proof directly to employers.
+          </p>
+          <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <button onclick="closeModal(); showToast('Passport card shared via WhatsApp!')" class="bg-emerald-600 text-white font-bold py-3 rounded-2xl text-xs active:scale-95">
+              WhatsApp Share
+            </button>
+            <button onclick="closeModal(); showToast('Passport link copied to clipboard!')" class="bg-[#1B1F6B] text-white font-bold py-3 rounded-2xl text-xs active:scale-95">
+              Copy Link
+            </button>
+          </div>
+          <button onclick="closeModal()" class="w-full text-xs font-semibold text-[#64748B] py-1.5">
+            Cancel
+          </button>
+        </div>
+      `);
+    }
+
+    function renderPassportScreen() {
+      const photosHtml = WORKER_PROFILE.workPhotos.map(photo => `
+        <div
+          onclick="openPhotoModal('${photo.id}')"
+          class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-2xs active:scale-95 transition-transform cursor-pointer"
+        >
+          <div class="relative">
+            ${getWorkIllustrationSvg(photo.svgType)}
+            <span class="absolute bottom-1.5 left-1.5 right-1.5 bg-slate-900/85 backdrop-blur-xs text-white text-[9.5px] font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+              AI check: ${photo.confidence} confidence
+            </span>
+          </div>
+          <div class="p-2.5">
+            <p class="text-xs font-bold text-slate-800 truncate">${photo.title}</p>
+            <p class="text-[10px] text-[#64748B]">${photo.location}</p>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="px-4 pt-4 pb-2 space-y-3.5 screen-view">
+          <!-- Profile Identity Card -->
+          <div class="bg-gradient-to-br from-[#1B1F6B] to-[#2A308C] text-white rounded-3xl p-4 shadow-md relative overflow-hidden">
+            <div class="flex items-center gap-3.5">
+              <!-- Worker Avatar SVG -->
+              <div class="w-16 h-16 rounded-2xl bg-orange-100 border-2 border-white/80 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                <svg class="w-14 h-14" viewBox="0 0 64 64">
+                  <circle cx="32" cy="24" r="12" fill="#9A3412"/>
+                  <path d="M18 20 C18 11, 46 11, 46 20 Z" fill="#F97316"/>
+                  <rect x="16" y="19" width="32" height="3" rx="1.5" fill="#EA580C"/>
+                  <path d="M12 58 C12 43, 52 43, 52 58 Z" fill="#1E293B"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-1.5">
+                  <h2 class="text-lg font-extrabold leading-tight">${WORKER_PROFILE.name}</h2>
+                  <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <p class="text-xs text-indigo-100 font-medium">${WORKER_PROFILE.trade} • ${WORKER_PROFILE.area}</p>
+                <span class="inline-block mt-1 bg-white/15 text-[10.5px] font-semibold px-2.5 py-0.5 rounded-full">
+                  ${WORKER_PROFILE.experience} experience
+                </span>
+              </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-2 gap-2.5 mt-4 pt-3 border-t border-white/15 text-center">
+              <div class="bg-white/10 rounded-2xl py-2 px-3">
+                <span class="text-base font-extrabold text-amber-300 block">${WORKER_PROFILE.rating} ★</span>
+                <span class="text-[10.5px] text-indigo-100">Worker Rating</span>
+              </div>
+              <div class="bg-white/10 rounded-2xl py-2 px-3">
+                <span class="text-base font-extrabold text-emerald-300 block">${WORKER_PROFILE.verifiedJobs}</span>
+                <span class="text-[10.5px] text-indigo-100">Verified Jobs</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Verified Skills Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90 space-y-2.5">
+            <h3 class="text-sm font-extrabold text-[#1B1F6B]">Verified Skills</h3>
+
+            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#C2410C]"></span>
+                <span class="text-xs font-bold text-slate-800">Wiring</span>
+              </div>
+              <span class="inline-flex items-center gap-1 bg-indigo-50 text-[#1B1F6B] border border-indigo-200 px-2.5 py-1 rounded-full text-[11px] font-bold">
+                <svg class="w-3.5 h-3.5 text-[#C2410C]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+                AI-checked 92%
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                <span class="text-xs font-bold text-slate-800">Appliance repair</span>
+              </div>
+              <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-[11px] font-bold">
+                <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Peer verified
+              </span>
+            </div>
+          </div>
+
+          <!-- Work Photos Grid -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-extrabold text-[#1B1F6B]">Verified Work Photos</h3>
+              <span class="text-[11px] text-[#64748B] font-medium">Tap to inspect</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              ${photosHtml}
+            </div>
+          </div>
+
+          <!-- QR Code & Share Passport Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90 text-center space-y-3">
+            <div class="flex items-center gap-3.5 text-left">
+              <!-- Crisp SVG QR Code -->
+              <div class="w-20 h-20 p-2 bg-white border-2 border-[#1B1F6B] rounded-2xl shrink-0 flex items-center justify-center">
+                <svg viewBox="0 0 60 60" class="w-full h-full fill-[#1B1F6B]">
+                  <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="#1B1F6B" stroke-width="4"/>
+                  <rect x="9" y="9" width="6" height="6"/>
+                  <rect x="40" y="4" width="16" height="16" rx="2" fill="none" stroke="#1B1F6B" stroke-width="4"/>
+                  <rect x="45" y="9" width="6" height="6"/>
+                  <rect x="4" y="40" width="16" height="16" rx="2" fill="none" stroke="#1B1F6B" stroke-width="4"/>
+                  <rect x="9" y="45" width="6" height="6"/>
+                  <rect x="26" y="6" width="6" height="6"/>
+                  <rect x="26" y="16" width="8" height="6"/>
+                  <rect x="6" y="26" width="10" height="6"/>
+                  <rect x="22" y="26" width="14" height="8" fill="#C2410C"/>
+                  <rect x="42" y="26" width="12" height="6"/>
+                  <rect x="26" y="40" width="6" height="14"/>
+                  <rect x="38" y="38" width="8" height="8"/>
+                  <rect x="48" y="48" width="8" height="8"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-sm font-extrabold text-slate-900">Passport ID #KC-4092</h4>
+                <p class="text-[11px] text-[#64748B] leading-snug mt-0.5">
+                  Employers can scan this QR code to verify your work history instantly.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onclick="openSharePassportModal()"
+              class="w-full bg-[#C2410C] hover:bg-[#9A3412] active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-sm"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              Share passport
+            </button>
+
+            <!-- Data Ownership Note -->
+            <div class="bg-[#F5EFE0] rounded-2xl px-3 py-2.5 flex items-center justify-center gap-2 text-[11px] font-semibold text-[#1B1F6B]">
+              <svg class="w-4 h-4 text-[#C2410C] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <span>You own this data. You decide who sees it.</span>
+            </div>
+          </div>
+
+          ${renderFooter()}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // SCREEN 5: ALERTS & TEAM HIRING
+    // ==========================================
+    function setUrgentAlert(status) {
+      state.urgentAlertStatus = status;
+      updateTabBar();
+      renderScreen();
+      if (status === 'accepted') {
+        showToast('Urgent alert accepted! Details sent.');
+      } else if (status === 'skipped') {
+        showToast('Urgent alert skipped.');
+      }
+    }
+
+    function toggleTeamJoin() {
+      state.teamJoined = !state.teamJoined;
+      updateTabBar();
+      renderScreen();
+      if (state.teamJoined) {
+        showToast('Team hiring request accepted!');
+      }
+    }
+
+    function renderAlertsScreen() {
+      const alertStatus = state.urgentAlertStatus;
+
+      return `
+        <div class="px-4 pt-4 pb-2 space-y-4 screen-view">
+          <div>
+            <h2 class="text-base font-extrabold text-[#1B1F6B]">Live Alerts & Team Requests</h2>
+            <p class="text-xs text-[#64748B]">Instant nearby dispatch & multi-worker crew jobs</p>
+          </div>
+
+          <!-- Push-Style Urgent Alert Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-md border-2 ${alertStatus === 'accepted' ? 'border-emerald-400' : 'border-orange-300'} relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="inline-flex items-center gap-1.5 bg-red-600 text-white text-[10.5px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                Urgent Push Alert
+              </span>
+              <span class="text-[11px] font-semibold text-[#64748B]">Just now</span>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-orange-100 text-[#C2410C] flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-[14.5px] font-extrabold text-slate-900 leading-snug">
+                  Urgent: Plumber needed in 2 hours, 1.8 km away, Rs 1,000
+                </h3>
+                <p class="text-xs text-[#64748B] mt-1">
+                  Verified homeowner • Deccan Gymkhana • Instant UPI pay
+                </p>
+              </div>
+            </div>
+
+            ${alertStatus === 'pending' ? `
+              <div class="grid grid-cols-2 gap-2.5 mt-4">
+                <button
+                  onclick="setUrgentAlert('accepted')"
+                  class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all text-white font-bold py-3 rounded-2xl text-sm shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Accept
+                </button>
+                <button
+                  onclick="setUrgentAlert('skipped')"
+                  class="bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all text-slate-700 font-bold py-3 rounded-2xl text-sm flex items-center justify-center gap-1.5"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                  Skip
+                </button>
+              </div>
+            ` : alertStatus === 'accepted' ? `
+              <div class="mt-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center justify-between">
+                <span class="text-xs font-bold text-emerald-800">Accepted! Shared with your plumber buddy.</span>
+                <button onclick="setUrgentAlert('pending')" class="text-[11px] font-bold text-[#1B1F6B] underline">Undo</button>
+              </div>
+            ` : `
+              <div class="mt-3.5 bg-slate-100 rounded-2xl p-3 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-600">Alert skipped</span>
+                <button onclick="setUrgentAlert('pending')" class="text-[11px] font-bold text-[#1B1F6B] underline">Undo</button>
+              </div>
+            `}
+          </div>
+
+          <!-- Team Hiring Card -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/90 space-y-3.5">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="inline-flex items-center gap-1 bg-[#EEF0FA] text-[#1B1F6B] text-[10.5px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full mb-1.5">
+                  <svg class="w-3.5 h-3.5 text-[#C2410C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  Team Hiring
+                </span>
+                <h3 class="text-sm font-extrabold text-slate-900">Mason + Helper + Painter</h3>
+                <p class="text-xs text-[#64748B] font-medium">Patil Builders • Wakad • 1 combined request</p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 block">
+                  Rs 2,400/day
+                </span>
+                <span class="text-[10px] text-[#64748B] mt-0.5 block">Total crew pay</span>
+              </div>
+            </div>
+
+            <!-- Three Small Slots Showing Matched Workers -->
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <!-- Slot 1: Mason -->
+              <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-2.5 text-center">
+                <div class="w-9 h-9 rounded-full bg-[#1B1F6B] text-white font-bold text-xs flex items-center justify-center mx-auto mb-1.5">
+                  SM
+                </div>
+                <span class="inline-block bg-orange-100 text-[#C2410C] text-[9.5px] font-extrabold px-2 py-0.5 rounded-full mb-1">
+                  Mason
+                </span>
+                <p class="text-[11px] font-bold text-slate-900 truncate">Suresh M.</p>
+                <p class="text-[10px] text-emerald-700 font-semibold">4.8 ★ Verified</p>
+              </div>
+
+              <!-- Slot 2: Helper -->
+              <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-2.5 text-center">
+                <div class="w-9 h-9 rounded-full bg-[#1B1F6B] text-white font-bold text-xs flex items-center justify-center mx-auto mb-1.5">
+                  DR
+                </div>
+                <span class="inline-block bg-indigo-100 text-[#1B1F6B] text-[9.5px] font-extrabold px-2 py-0.5 rounded-full mb-1">
+                  Helper
+                </span>
+                <p class="text-[11px] font-bold text-slate-900 truncate">Deepak R.</p>
+                <p class="text-[10px] text-emerald-700 font-semibold">4.6 ★ Verified</p>
+              </div>
+
+              <!-- Slot 3: Painter -->
+              <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-2.5 text-center">
+                <div class="w-9 h-9 rounded-full bg-[#1B1F6B] text-white font-bold text-xs flex items-center justify-center mx-auto mb-1.5">
+                  AK
+                </div>
+                <span class="inline-block bg-emerald-100 text-emerald-800 text-[9.5px] font-extrabold px-2 py-0.5 rounded-full mb-1">
+                  Painter
+                </span>
+                <p class="text-[11px] font-bold text-slate-900 truncate">Anwar K.</p>
+                <p class="text-[10px] text-emerald-700 font-semibold">4.9 ★ Verified</p>
+              </div>
+            </div>
+
+            <button
+              onclick="toggleTeamJoin()"
+              class="w-full ${state.teamJoined ? 'bg-emerald-600 text-white' : 'bg-[#1B1F6B] hover:bg-[#12154D] text-white'} active:scale-[0.98] transition-all font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              ${state.teamJoined ? `
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Team Crew Confirmed (3/3 Ready)
+              ` : `
+                Confirm Team Crew (3/3 Matched)
+              `}
+            </button>
+          </div>
+
+          ${renderFooter()}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // MAIN RENDER CONTROLLER
+    // ==========================================
+    function renderScreen() {
+      const container = document.getElementById('main-content');
+      switch (state.currentScreen) {
+        case 'chat':
+          container.innerHTML = renderChatScreen();
+          break;
+        case 'jobs':
+          container.innerHTML = renderJobsScreen();
+          break;
+        case 'trust':
+          container.innerHTML = renderTrustScreen();
+          break;
+        case 'confirmed':
+          container.innerHTML = renderConfirmedScreen();
+          break;
+        case 'passport':
+          container.innerHTML = renderPassportScreen();
+          break;
+        case 'alerts':
+          container.innerHTML = renderAlertsScreen();
+          break;
+        default:
+          container.innerHTML = renderChatScreen();
+      }
+    }
+
+    // Initialize App on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateTabBar();
+      renderScreen();
+    });
+  </script>
+</body>
+</html>
